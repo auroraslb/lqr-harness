@@ -1,0 +1,377 @@
+{
+  "case_id": "payload_1kg_3_5x",
+  "finished_at": "2026-10-07T21:09:35+00:00",
+  "spec": {
+    "request": "Add a 1 kg tool to the right hand. The robot must survive 3.5 times the usual disturbance.",
+    "payload_kg": 1,
+    "payload_body": "lower_arm_right",
+    "stance": "left",
+    "use_keyframe": true,
+    "locked_joints": [],
+    "acceptance": {
+      "disturbance": 3.5,
+      "pass_rate": 0.95
+    }
+  },
+  "gates": {
+    "stage1": {
+      "max_root_torque_Nm": 0.5,
+      "max_static_ctrl": 0.8,
+      "min_com_margin_mm": 5.0
+    },
+    "stage3": {
+      "max_mean_saturation": 0.01
+    }
+  },
+  "status": "passed_with_changes",
+  "summary": "Request: add a 1 kg tool to the right hand (lower_arm_right), survive 3.5x the usual disturbance, left-leg stance from the tutorial keyframe.\n\nStage 1 (pose): Keyframe pose failed initially (root torque 6.59 Nm, static ankle_y_left at 83% > 80% limit). Applied a ~1.1deg trim on ankle_x_left, which zeroed root torque but left ankle_y_left at 83%. Applied a posture fix (small torso/arm redistribution: elbow_left +0.4deg, shoulder1_left +0.1deg, shoulder1_right +0.6deg, shoulder2_left -0.7deg, shoulder2_right -2.0deg) which brought static ankle_y_left exactly to 80% and CoM margin to 6.0 mm (>= 5 mm required). Gate passed.\n\nStage 2 (controller): Default multipliers (all=1) failed badly under the 3.5x disturbance - 0/5 quick-check seeds survived, with heavy saturation on ankle_x_left/ankle_y_left/hip_x_left starting at 0.2s. Increasing motor authority and tightening non-balance joint tolerance (motor=2, other=0.5) immediately fixed this: 5/5 quick check, zero saturation. A narrow tune search around that point found a better point, motor=3, other=0.75 (com=1, balance=1), which screened 5/5 and won the 20-seed comparison with zero/near-zero saturation and the highest margin.\n\nStage 3 (judged evaluation): adopted controller (com=1, balance=1, other=0.75, motor=3) evaluated on 20 fresh unseen seeds plus the no-noise case: 20/20 stayed up, no fall without noise, mean saturation 0.0003 (only brief ankle_y_left saturation starting at 2.1s), worst CoM drift 5.1 cm. This clears the 95% pass-rate acceptance for 3.5x disturbance with full margin.\n\nResult: PASSED (passed_with_changes - pose trim + posture adjustment applied, controller tuned to motor=3/other=0.75 vs. default 1/1/1/1). The extra motor authority was needed because the hand payload plus 3.5x disturbance pushes the stance ankle/hip into saturation at default gains; loosening non-balance joint tolerance let the controller use more of the arm/torso DOFs to absorb disturbance instead of relying solely on the ankle.",
+  "changes": [
+    {
+      "kind": "trim",
+      "severity": "info",
+      "max_change_deg": 1.1,
+      "detail": "fix_stance(mode=trim)",
+      "joint_changes_deg": {
+        "ankle_x_left": -1.1
+      }
+    },
+    {
+      "kind": "posture",
+      "severity": "info",
+      "max_change_deg": 2.0,
+      "detail": "fix_stance(mode=posture)",
+      "joint_changes_deg": {
+        "elbow_left": 0.4,
+        "shoulder1_left": 0.1,
+        "shoulder1_right": 0.6,
+        "shoulder2_left": -0.7,
+        "shoulder2_right": -2.0
+      }
+    }
+  ],
+  "final_controller": {
+    "multipliers": {
+      "com": 1,
+      "balance": 1,
+      "other": 0.75,
+      "motor": 3
+    },
+    "tolerances": {
+      "com_cm": 1.94,
+      "balance_joints_deg_median": 25.0,
+      "other_joints_deg_median": 54.4,
+      "motor_command_median": 3.0
+    }
+  },
+  "counters": {
+    "stance_fixes": 2,
+    "controller_tries": 2,
+    "tunes": 1,
+    "evaluations": 1,
+    "simulations": 150
+  },
+  "steps": [
+    {
+      "step": 1,
+      "actor": "agent",
+      "action": "create_case",
+      "rationale": "Create case for 1kg tool payload on right hand with 3.5x disturbance requirement, starting from tutorial one-leg keyframe.",
+      "params": {
+        "spec": {
+          "request": "Add a 1 kg tool to the right hand. The robot must survive 3.5 times the usual disturbance.",
+          "payload_kg": 1,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [],
+          "acceptance": {
+            "disturbance": 3.5,
+            "pass_rate": 0.95
+          }
+        }
+      },
+      "metrics": {},
+      "gate": null
+    },
+    {
+      "step": 2,
+      "actor": "agent",
+      "action": "check_feasibility",
+      "rationale": "Check if the one-leg keyframe pose with the added 1kg hand payload is statically feasible before building a controller.",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": -0.518,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.127,
+        "root_torque_norm_Nm": 6.59,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0482,
+        "ctrl0_max_frac": 0.686,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 6.8,
+        "static_max_ctrl": 0.831,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "actor": "agent",
+      "action": "fix_stance:trim",
+      "rationale": "Root torque and static ctrl fail; trim the stance ankle to center CoM under the foot before trying posture changes.",
+      "params": {
+        "mode": "trim"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0484,
+        "ctrl0_max_frac": 0.83,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 5.8,
+        "static_max_ctrl": 0.83,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "static_max_ctrl"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "actor": "agent",
+      "action": "fix_stance:posture",
+      "rationale": "Ankle_y_left still exceeds 80% motor capacity; adjust torso/arm posture to reduce static ankle torque while keeping CoM margin.",
+      "params": {
+        "mode": "posture"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0469,
+        "ctrl0_max_frac": 0.8,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 6.0,
+        "static_max_ctrl": 0.8,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 5,
+      "actor": "agent",
+      "action": "check_feasibility",
+      "rationale": "Confirm the gate passes cleanly after posture fix before proceeding to controller design.",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0469,
+        "ctrl0_max_frac": 0.8,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 6.0,
+        "static_max_ctrl": 0.8,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 6,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Baseline LQR with default multipliers to see how it handles the payload-shifted pose before tuning for the 3.5x disturbance requirement.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 1
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 0,
+        "n_seeds": 5,
+        "fall_times_s": [
+          2.65,
+          1.47,
+          2.55,
+          1.95,
+          4.565
+        ],
+        "earliest_saturation_s": 0.215,
+        "top_saturating_actuators": {
+          "ankle_x_left": 776,
+          "ankle_y_left": 256,
+          "hip_x_left": 174
+        },
+        "worst_com_m": 0.1496,
+        "mean_sat": 0.3756,
+        "max_gain": 46.5
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 7,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Heavy saturation on ankle_x_left/ankle_y_left and all seeds fell; per prior experience, increasing motor authority and tightening non-balance joint tolerance should reduce drift and saturation under this large 3.5x disturbance.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 0.5,
+        "motor": 2
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 5,
+        "n_seeds": 5,
+        "fall_times_s": [],
+        "earliest_saturation_s": null,
+        "top_saturating_actuators": {},
+        "worst_com_m": 0.0506,
+        "mean_sat": 0.0,
+        "max_gain": 81.8
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 8,
+      "actor": "agent",
+      "action": "tune",
+      "rationale": "Narrow search around the successful (other=0.5, motor=2) point to confirm robustness and check if a less aggressive or more aggressive setting performs better on more seeds before committing an evaluation.",
+      "params": {
+        "grid": {
+          "com": [
+            1
+          ],
+          "balance": [
+            1
+          ],
+          "other": [
+            0.5,
+            0.75,
+            1
+          ],
+          "motor": [
+            1.5,
+            2,
+            3
+          ]
+        }
+      },
+      "metrics": {
+        "adopted": {
+          "com": 1,
+          "balance": 1,
+          "other": 0.75,
+          "motor": 3
+        },
+        "ranking": [
+          {
+            "multipliers": {
+              "com": 1,
+              "balance": 1,
+              "other": 0.75,
+              "motor": 3
+            },
+            "screen": "5/5",
+            "choose_pass": "20/20",
+            "mean_sat": 0.0,
+            "max_gain": 111.7
+          },
+          {
+            "multipliers": {
+              "com": 1,
+              "balance": 1,
+              "other": 0.5,
+              "motor": 2
+            },
+            "screen": "5/5",
+            "choose_pass": "20/20",
+            "mean_sat": 0.005,
+            "max_gain": 81.8
+          }
+        ],
+        "simulations": 117
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 9,
+      "actor": "agent",
+      "action": "evaluate",
+      "rationale": "Adopted controller (other=0.75, motor=3) passed 20/20 on the tune's choose set with zero saturation; run the formal stage-3 judgment on fresh unseen seeds.",
+      "params": {
+        "multipliers": {
+          "com": 1,
+          "balance": 1,
+          "other": 0.75,
+          "motor": 3
+        }
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 20,
+        "n_seeds": 20,
+        "fall_times_s": [],
+        "earliest_saturation_s": 2.125,
+        "top_saturating_actuators": {
+          "ankle_y_left": 16
+        },
+        "worst_com_m": 0.0512,
+        "mean_sat": 0.0003,
+        "max_gain": 111.7,
+        "seeds": "26-45"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 10,
+      "actor": "agent",
+      "action": "finish",
+      "rationale": "Stage 3 evaluation passed 20/20 (100% > 95% required) on unseen seeds with no falls and negligible saturation, satisfying the 3.5x disturbance acceptance criterion.",
+      "params": {
+        "status": "passed_with_changes"
+      },
+      "metrics": {},
+      "gate": null
+    }
+  ]
+}

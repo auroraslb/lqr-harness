@@ -1,0 +1,195 @@
+{
+  "case_id": "locked_arm_5kg",
+  "finished_at": "2026-10-08T10:16:08+00:00",
+  "spec": {
+    "request": "Add a 5 kg tool to the right hand. The right arm must hold the tool exactly where it is now, so the right shoulder and elbow may not move.",
+    "payload_kg": 5.0,
+    "payload_body": "lower_arm_right",
+    "stance": "left",
+    "use_keyframe": true,
+    "locked_joints": [
+      "shoulder1_right",
+      "shoulder2_right",
+      "elbow_right"
+    ],
+    "acceptance": {
+      "disturbance": 1.0,
+      "pass_rate": 0.95
+    }
+  },
+  "gates": {
+    "stage1": {
+      "max_root_torque_Nm": 0.5,
+      "max_static_ctrl": 0.8,
+      "min_com_margin_mm": 5.0
+    },
+    "stage3": {
+      "max_mean_saturation": 0.01
+    }
+  },
+  "status": "no_solution_found",
+  "summary": "Stage 1 still fails after trim, posture: ['static_max_ctrl']; metrics {'height_offset_mm': 0.0, 'offset_at_sweep_edge': False, 'vertical_residual_N': -0.001, 'root_torque_norm_Nm': 0.02, 'root_force_horiz_N': 0.0, 'init_com_foot_m': 0.0408, 'ctrl0_max_frac': 1.065, 'ctrl0_in_limits': False, 'com_margin_mm': 20.2, 'static_max_ctrl': 1.065, 'static_limiting_actuator': 'shoulder1_right'}",
+  "changes": [
+    {
+      "kind": "trim",
+      "severity": "info",
+      "max_change_deg": 1.6,
+      "detail": "fix_stance(mode=trim)",
+      "joint_changes_deg": {
+        "ankle_x_left": -1.6
+      }
+    },
+    {
+      "kind": "posture",
+      "severity": "major",
+      "max_change_deg": 40.9,
+      "detail": "fix_stance(mode=posture)",
+      "joint_changes_deg": {
+        "abdomen_x": 0.6,
+        "abdomen_y": 1.1,
+        "abdomen_z": -8.0,
+        "ankle_x_left": 0.4,
+        "ankle_y_left": 2.0,
+        "elbow_left": -26.3,
+        "shoulder1_left": -40.9,
+        "shoulder2_left": -34.5
+      }
+    }
+  ],
+  "final_controller": {
+    "multipliers": null,
+    "tolerances": null
+  },
+  "counters": {
+    "stance_fixes": 2,
+    "controller_tries": 0,
+    "tunes": 0,
+    "evaluations": 0,
+    "simulations": 0
+  },
+  "steps": [
+    {
+      "step": 1,
+      "actor": "baseline",
+      "action": "create_case",
+      "rationale": "rule: create the case from the structured spec",
+      "params": {
+        "spec": {
+          "request": "Add a 5 kg tool to the right hand. The right arm must hold the tool exactly where it is now, so the right shoulder and elbow may not move.",
+          "payload_kg": 5.0,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [
+            "shoulder1_right",
+            "shoulder2_right",
+            "elbow_right"
+          ],
+          "acceptance": {
+            "disturbance": 1.0,
+            "pass_rate": 0.95
+          }
+        }
+      },
+      "metrics": {},
+      "gate": null
+    },
+    {
+      "step": 2,
+      "actor": "baseline",
+      "action": "check_feasibility",
+      "rationale": "rule: always check stage 1 first",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": -0.561,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.286,
+        "root_torque_norm_Nm": 21.13,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.079,
+        "ctrl0_max_frac": 1.065,
+        "ctrl0_in_limits": false,
+        "com_margin_mm": -11.2,
+        "static_max_ctrl": 1.496,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "actor": "baseline",
+      "action": "fix_stance:trim",
+      "rationale": "rule: stage 1 failed, next fix is trim",
+      "params": {
+        "mode": "trim"
+      },
+      "metrics": {
+        "height_offset_mm": 0.001,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.082,
+        "root_torque_norm_Nm": 6.66,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0794,
+        "ctrl0_max_frac": 1.481,
+        "ctrl0_in_limits": false,
+        "com_margin_mm": -13.1,
+        "static_max_ctrl": 1.496,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "actor": "baseline",
+      "action": "fix_stance:posture",
+      "rationale": "rule: stage 1 failed, next fix is posture",
+      "params": {
+        "mode": "posture"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.001,
+        "root_torque_norm_Nm": 0.02,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0408,
+        "ctrl0_max_frac": 1.065,
+        "ctrl0_in_limits": false,
+        "com_margin_mm": 20.2,
+        "static_max_ctrl": 1.065,
+        "static_limiting_actuator": "shoulder1_right"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "static_max_ctrl"
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "actor": "baseline",
+      "action": "finish",
+      "rationale": "rule: no stance fix left",
+      "params": {
+        "status": "no_solution_found"
+      },
+      "metrics": {},
+      "gate": null
+    }
+  ]
+}

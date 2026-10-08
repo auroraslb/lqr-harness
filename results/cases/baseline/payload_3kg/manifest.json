@@ -1,0 +1,297 @@
+{
+  "case_id": "payload_3kg",
+  "finished_at": "2026-10-07T21:10:09+00:00",
+  "spec": {
+    "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+    "payload_kg": 3.0,
+    "payload_body": "lower_arm_right",
+    "stance": "left",
+    "use_keyframe": true,
+    "locked_joints": [],
+    "acceptance": {
+      "disturbance": 1.0,
+      "pass_rate": 0.95
+    }
+  },
+  "gates": {
+    "stage1": {
+      "max_root_torque_Nm": 0.5,
+      "max_static_ctrl": 0.8,
+      "min_com_margin_mm": 5.0
+    },
+    "stage3": {
+      "max_mean_saturation": 0.01
+    }
+  },
+  "status": "passed_with_changes",
+  "summary": "Tuned multipliers {'com': 2, 'balance': 0.5, 'other': 0.5, 'motor': 0.5}; judged 20/20.",
+  "changes": [
+    {
+      "kind": "trim",
+      "severity": "info",
+      "max_change_deg": 1.5,
+      "detail": "fix_stance(mode=trim)",
+      "joint_changes_deg": {
+        "ankle_x_left": -1.5
+      }
+    },
+    {
+      "kind": "posture",
+      "severity": "warning",
+      "max_change_deg": 20.7,
+      "detail": "fix_stance(mode=posture)",
+      "joint_changes_deg": {
+        "abdomen_x": -0.3,
+        "abdomen_y": -0.9,
+        "ankle_x_left": 0.3,
+        "ankle_y_left": 0.8,
+        "elbow_left": 1.3,
+        "elbow_right": 4.6,
+        "shoulder1_left": -4.2,
+        "shoulder1_right": 20.7,
+        "shoulder2_left": -5.8,
+        "shoulder2_right": -2.5
+      }
+    }
+  ],
+  "final_controller": {
+    "multipliers": {
+      "com": 2,
+      "balance": 0.5,
+      "other": 0.5,
+      "motor": 0.5
+    },
+    "tolerances": {
+      "com_cm": 3.87,
+      "balance_joints_deg_median": 12.5,
+      "other_joints_deg_median": 36.2,
+      "motor_command_median": 0.5
+    }
+  },
+  "counters": {
+    "stance_fixes": 2,
+    "controller_tries": 0,
+    "tunes": 1,
+    "evaluations": 1,
+    "simulations": 570
+  },
+  "steps": [
+    {
+      "step": 1,
+      "actor": "baseline",
+      "action": "create_case",
+      "rationale": "rule: create the case from the structured spec",
+      "params": {
+        "spec": {
+          "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+          "payload_kg": 3.0,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [],
+          "acceptance": {
+            "disturbance": 1.0,
+            "pass_rate": 0.95
+          }
+        }
+      },
+      "metrics": {},
+      "gate": null
+    },
+    {
+      "step": 2,
+      "actor": "baseline",
+      "action": "check_feasibility",
+      "rationale": "rule: always check stage 1 first",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": -0.54,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.007,
+        "root_torque_norm_Nm": 13.75,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0641,
+        "ctrl0_max_frac": 0.754,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": -2.6,
+        "static_max_ctrl": 1.163,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "actor": "baseline",
+      "action": "fix_stance:trim",
+      "rationale": "rule: stage 1 failed, next fix is trim",
+      "params": {
+        "mode": "trim"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.339,
+        "root_torque_norm_Nm": 2.66,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0644,
+        "ctrl0_max_frac": 1.174,
+        "ctrl0_in_limits": false,
+        "com_margin_mm": -4.2,
+        "static_max_ctrl": 1.163,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "actor": "baseline",
+      "action": "fix_stance:posture",
+      "rationale": "rule: stage 1 failed, next fix is posture",
+      "params": {
+        "mode": "posture"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.044,
+        "ctrl0_max_frac": 0.8,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 8.6,
+        "static_max_ctrl": 0.8,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 5,
+      "actor": "baseline",
+      "action": "tune",
+      "rationale": "rule: tune with the default grid",
+      "params": {
+        "grid": {
+          "com": [
+            0.5,
+            1,
+            2
+          ],
+          "balance": [
+            0.5,
+            1,
+            2
+          ],
+          "other": [
+            0.5,
+            1,
+            2
+          ],
+          "motor": [
+            0.5,
+            1,
+            2
+          ]
+        }
+      },
+      "metrics": {
+        "adopted": {
+          "com": 2,
+          "balance": 0.5,
+          "other": 0.5,
+          "motor": 0.5
+        },
+        "ranking": [
+          {
+            "multipliers": {
+              "com": 2,
+              "balance": 0.5,
+              "other": 0.5,
+              "motor": 0.5
+            },
+            "screen": "5/5",
+            "choose_pass": "20/20",
+            "mean_sat": 0.0,
+            "max_gain": 29.7
+          },
+          {
+            "multipliers": {
+              "com": 2,
+              "balance": 1,
+              "other": 0.5,
+              "motor": 0.5
+            },
+            "screen": "5/5",
+            "choose_pass": "19/20",
+            "mean_sat": 0.0064,
+            "max_gain": 29.0
+          }
+        ],
+        "simulations": 549
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 6,
+      "actor": "baseline",
+      "action": "evaluate",
+      "rationale": "rule: judge the tuned controller",
+      "params": {
+        "multipliers": {
+          "com": 2,
+          "balance": 0.5,
+          "other": 0.5,
+          "motor": 0.5
+        }
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 20,
+        "n_seeds": 20,
+        "fall_times_s": [],
+        "earliest_saturation_s": null,
+        "top_saturating_actuators": {},
+        "worst_com_m": 0.0493,
+        "mean_sat": 0.0,
+        "max_gain": 29.7,
+        "seeds": "26-45"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 7,
+      "actor": "baseline",
+      "action": "finish",
+      "rationale": "rule: report the judged result",
+      "params": {
+        "status": "passed_with_changes"
+      },
+      "metrics": {},
+      "gate": null
+    }
+  ]
+}

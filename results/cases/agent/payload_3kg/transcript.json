@@ -1,0 +1,292 @@
+{
+  "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+  "stats": {
+    "status": "passed_with_changes",
+    "case_id": "payload_3kg",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 65.8,
+    "llm_calls": 14,
+    "input_tokens": 16,
+    "output_tokens": 2427,
+    "simulations": 27
+  },
+  "transcript": [
+    {
+      "role": "tool",
+      "name": "create_case",
+      "input": {
+        "case_id": "payload_3kg",
+        "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+        "payload_kg": 3,
+        "use_keyframe": true,
+        "locked_joints": [],
+        "stance": "left",
+        "rationale": "Create the case per the request: 3kg tool on right hand, balance on left leg, starting from the tutorial keyframe since no mention of a new model."
+      },
+      "output": {
+        "case_id": "payload_3kg",
+        "spec": {
+          "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+          "payload_kg": 3,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [],
+          "acceptance": {
+            "disturbance": 1.0,
+            "pass_rate": 0.95
+          }
+        },
+        "gates": {
+          "stage1": {
+            "max_root_torque_Nm": 0.5,
+            "max_static_ctrl": 0.8,
+            "min_com_margin_mm": 5.0
+          },
+          "stage3": {
+            "max_mean_saturation": 0.01
+          }
+        },
+        "budgets": {
+          "stance_fixes": 3,
+          "controller_tries": 8,
+          "tunes": 2,
+          "evaluations": 2
+        }
+      }
+    },
+    {
+      "role": "tool",
+      "name": "check_feasibility",
+      "input": {
+        "case_id": "payload_3kg",
+        "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before touching the controller."
+      },
+      "output": {
+        "stage": 1,
+        "metrics": {
+          "height_offset_mm": -0.54,
+          "offset_at_sweep_edge": false,
+          "vertical_residual_N": -0.007,
+          "root_torque_norm_Nm": 13.75,
+          "root_force_horiz_N": 0.0,
+          "init_com_foot_m": 0.0641,
+          "ctrl0_max_frac": 0.754,
+          "ctrl0_in_limits": true,
+          "com_margin_mm": -2.6,
+          "static_max_ctrl": 1.163,
+          "static_limiting_actuator": "ankle_y_left"
+        },
+        "gate": {
+          "pass": false,
+          "failed": [
+            "root_torque_norm_Nm",
+            "static_max_ctrl",
+            "com_margin_mm"
+          ]
+        }
+      }
+    },
+    {
+      "role": "tool",
+      "name": "fix_stance",
+      "input": {
+        "case_id": "payload_3kg",
+        "mode": "trim",
+        "rationale": "Root torque residual and CoM margin fail; start with a small ankle trim to re-center foot pressure under CoM before trying posture changes."
+      },
+      "output": {
+        "stage": 1,
+        "metrics": {
+          "height_offset_mm": 0.0,
+          "offset_at_sweep_edge": false,
+          "vertical_residual_N": -0.339,
+          "root_torque_norm_Nm": 2.66,
+          "root_force_horiz_N": 0.0,
+          "init_com_foot_m": 0.0644,
+          "ctrl0_max_frac": 1.174,
+          "ctrl0_in_limits": false,
+          "com_margin_mm": -4.2,
+          "static_max_ctrl": 1.163,
+          "static_limiting_actuator": "ankle_y_left"
+        },
+        "gate": {
+          "pass": false,
+          "failed": [
+            "root_torque_norm_Nm",
+            "static_max_ctrl",
+            "com_margin_mm"
+          ]
+        },
+        "change_raised": {
+          "kind": "trim",
+          "severity": "info",
+          "max_change_deg": 1.5,
+          "detail": "fix_stance(mode=trim)",
+          "joint_changes_deg": {
+            "ankle_x_left": -1.5
+          }
+        },
+        "budget_left": 2
+      }
+    },
+    {
+      "role": "assistant",
+      "text": "Trim improved root torque but not enough, and motor need/CoM margin still fail. Moving to posture fix (adjusts torso/arms too, which should help offload the ankle and recenter CoM with the heavy right-hand payload)."
+    },
+    {
+      "role": "tool",
+      "name": "fix_stance",
+      "input": {
+        "case_id": "payload_3kg",
+        "mode": "posture",
+        "rationale": "Trim alone insufficient; posture mode can shift torso/arms to compensate for the 3kg right-hand payload, reducing ankle motor load and restoring CoM margin."
+      },
+      "output": {
+        "stage": 1,
+        "metrics": {
+          "height_offset_mm": 0.0,
+          "offset_at_sweep_edge": false,
+          "vertical_residual_N": 0.0,
+          "root_torque_norm_Nm": 0.0,
+          "root_force_horiz_N": 0.0,
+          "init_com_foot_m": 0.044,
+          "ctrl0_max_frac": 0.8,
+          "ctrl0_in_limits": true,
+          "com_margin_mm": 8.6,
+          "static_max_ctrl": 0.8,
+          "static_limiting_actuator": "ankle_y_left"
+        },
+        "gate": {
+          "pass": true,
+          "failed": []
+        },
+        "change_raised": {
+          "kind": "posture",
+          "severity": "warning",
+          "max_change_deg": 20.7,
+          "detail": "fix_stance(mode=posture)",
+          "joint_changes_deg": {
+            "abdomen_x": -0.3,
+            "abdomen_y": -0.9,
+            "ankle_x_left": 0.3,
+            "ankle_y_left": 0.8,
+            "elbow_left": 1.3,
+            "elbow_right": 4.6,
+            "shoulder1_left": -4.2,
+            "shoulder1_right": 20.7,
+            "shoulder2_left": -5.8,
+            "shoulder2_right": -2.5
+          }
+        },
+        "budget_left": 1
+      }
+    },
+    {
+      "role": "assistant",
+      "text": "Stage 1 now passes (root torque 0, CoM margin 8.6mm, static ctrl at exactly 80%). Proceeding to controller design."
+    },
+    {
+      "role": "tool",
+      "name": "try_controller",
+      "input": {
+        "case_id": "payload_3kg",
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 1,
+        "rationale": "Baseline LQR controller check with all multipliers at default to see how the posture-adjusted pose handles noise."
+      },
+      "output": {
+        "stage": 2,
+        "multipliers": {
+          "com": 1,
+          "balance": 1,
+          "other": 1,
+          "motor": 1
+        },
+        "tolerances": {
+          "com_cm": 1.94,
+          "balance_joints_deg_median": 25.0,
+          "other_joints_deg_median": 72.5,
+          "motor_command_median": 1.0
+        },
+        "quick_check": {
+          "no_noise_fell": false,
+          "no_noise_fell_time": null,
+          "pass": 5,
+          "n_seeds": 5,
+          "fall_times_s": [],
+          "earliest_saturation_s": null,
+          "top_saturating_actuators": {},
+          "worst_com_m": 0.0456,
+          "mean_sat": 0.0,
+          "max_gain": 47.6
+        },
+        "budget_left": 7
+      }
+    },
+    {
+      "role": "assistant",
+      "text": "Baseline passed 5/5 with zero saturation. This looks solid already. Let's evaluate on the stage 3 judge."
+    },
+    {
+      "role": "tool",
+      "name": "evaluate",
+      "input": {
+        "case_id": "payload_3kg",
+        "rationale": "Quick check passed 5/5 with no saturation at default multipliers; evaluate on the 20 unseen seeds to judge against acceptance criteria."
+      },
+      "output": {
+        "stage": 3,
+        "multipliers": {
+          "com": 1,
+          "balance": 1,
+          "other": 1,
+          "motor": 1
+        },
+        "metrics": {
+          "no_noise_fell": false,
+          "no_noise_fell_time": null,
+          "pass": 20,
+          "n_seeds": 20,
+          "fall_times_s": [],
+          "earliest_saturation_s": null,
+          "top_saturating_actuators": {},
+          "worst_com_m": 0.0464,
+          "mean_sat": 0.0,
+          "max_gain": 47.6,
+          "seeds": "26-45"
+        },
+        "gate": {
+          "pass": true,
+          "failed": []
+        },
+        "budget_left": 1
+      }
+    },
+    {
+      "role": "assistant",
+      "text": "20/20 passed with no falls, no saturation, comfortable CoM margins. Finishing as passed."
+    },
+    {
+      "role": "tool",
+      "name": "finish",
+      "input": {
+        "case_id": "payload_3kg",
+        "status": "passed",
+        "summary": "Added 3 kg payload to lower_arm_right (right hand/tool). Stage 1 initially failed on all three gates (root torque 13.75 Nm, static ctrl 116% on ankle_y_left, CoM margin -2.6 mm) due to the added mass pulling the CoM outside the left foot. A 1.5 deg ankle trim improved root torque but motor need/CoM margin still failed; a posture fix then redistributed torso and arms (notably shoulder_right +20.7 deg, elbow_right +4.6 deg, torso abdomen_y -0.9 deg, plus smaller left-arm/ankle adjustments) to counterbalance the right-hand payload. This brought the pose to root torque 0, static ctrl exactly at the 80% limit on ankle_y_left, and CoM margin +8.6 mm \u2014 all gates pass. Built the default LQR controller (com=balance=other=motor=1); quick check passed 5/5 with zero actuator saturation and worst CoM drift 4.6 cm. Evaluated on 20 unseen seeds (stage 3): 20/20 passed, no falls (including the no-noise run), zero mean saturation, same CoM drift magnitude. No tuning was needed beyond the pose fix. Design is accepted as passed_with_changes due to the posture modification required to carry the payload.",
+        "rationale": "Stage 3 evaluation passed 20/20 against default acceptance criteria (disturbance=1, pass_rate=0.95); design is complete and successful."
+      },
+      "output": {
+        "status": "passed_with_changes",
+        "saved_to": "/Users/aurora/lqr-harness/results/cases/agent/payload_3kg"
+      }
+    },
+    {
+      "role": "assistant",
+      "text": "The design passed, as **passed_with_changes**. Summary:\n\n**Task:** Add a 3 kg tool to the right hand, balance on the left leg.\n\n**Stage 1 (stance):** The naive keyframe pose failed all three gates once the 3 kg was added to the right forearm \u2014 the CoM shifted outside the foot (-2.6 mm margin) and the ankle motor was overloaded (116% of range). A small ankle trim alone wasn't enough, so a posture fix redistributed the torso and arms to counterbalance the hand-held load \u2014 most notably rotating the right shoulder ~21\u00b0 and right elbow ~4.6\u00b0, with compensating left-arm and torso adjustments. Result: root torque residual 0, ankle motor exactly at the 80% cap, CoM margin +8.6 mm. All gates pass.\n\n**Stage 2 (controller):** The default LQR controller (all four multipliers = 1) already handled the posture-corrected stance well \u2014 5/5 noise seeds held, zero actuator saturation, max CoM drift 4.6 cm. No tuning was required.\n\n**Stage 3 (judge):** Evaluated on 20 fresh seeds plus the no-noise run: 20/20 stayed balanced, zero saturation, consistent CoM drift (~4.6 cm worst case).\n\nThe only real cost of the payload was the posture change (arm/torso repositioning to counterbalance the tool) \u2014 the control gains needed no loosening or extra motor authority."
+    }
+  ]
+}

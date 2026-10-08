@@ -1,0 +1,7 @@
+mujoco>=3.2
+numpy
+scipy
+anthropic
+mcp<2      # only for running the agent through Claude Code
+mediapy    # render.py
+pillow     # render.py

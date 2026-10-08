@@ -1,0 +1,256 @@
+{
+  "case_id": "payload_3kg",
+  "finished_at": "2026-10-07T21:08:05+00:00",
+  "spec": {
+    "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+    "payload_kg": 3,
+    "payload_body": "lower_arm_right",
+    "stance": "left",
+    "use_keyframe": true,
+    "locked_joints": [],
+    "acceptance": {
+      "disturbance": 1.0,
+      "pass_rate": 0.95
+    }
+  },
+  "gates": {
+    "stage1": {
+      "max_root_torque_Nm": 0.5,
+      "max_static_ctrl": 0.8,
+      "min_com_margin_mm": 5.0
+    },
+    "stage3": {
+      "max_mean_saturation": 0.01
+    }
+  },
+  "status": "passed_with_changes",
+  "summary": "Added 3 kg payload to lower_arm_right (right hand/tool). Stage 1 initially failed on all three gates (root torque 13.75 Nm, static ctrl 116% on ankle_y_left, CoM margin -2.6 mm) due to the added mass pulling the CoM outside the left foot. A 1.5 deg ankle trim improved root torque but motor need/CoM margin still failed; a posture fix then redistributed torso and arms (notably shoulder_right +20.7 deg, elbow_right +4.6 deg, torso abdomen_y -0.9 deg, plus smaller left-arm/ankle adjustments) to counterbalance the right-hand payload. This brought the pose to root torque 0, static ctrl exactly at the 80% limit on ankle_y_left, and CoM margin +8.6 mm \u2014 all gates pass. Built the default LQR controller (com=balance=other=motor=1); quick check passed 5/5 with zero actuator saturation and worst CoM drift 4.6 cm. Evaluated on 20 unseen seeds (stage 3): 20/20 passed, no falls (including the no-noise run), zero mean saturation, same CoM drift magnitude. No tuning was needed beyond the pose fix. Design is accepted as passed_with_changes due to the posture modification required to carry the payload.",
+  "changes": [
+    {
+      "kind": "trim",
+      "severity": "info",
+      "max_change_deg": 1.5,
+      "detail": "fix_stance(mode=trim)",
+      "joint_changes_deg": {
+        "ankle_x_left": -1.5
+      }
+    },
+    {
+      "kind": "posture",
+      "severity": "warning",
+      "max_change_deg": 20.7,
+      "detail": "fix_stance(mode=posture)",
+      "joint_changes_deg": {
+        "abdomen_x": -0.3,
+        "abdomen_y": -0.9,
+        "ankle_x_left": 0.3,
+        "ankle_y_left": 0.8,
+        "elbow_left": 1.3,
+        "elbow_right": 4.6,
+        "shoulder1_left": -4.2,
+        "shoulder1_right": 20.7,
+        "shoulder2_left": -5.8,
+        "shoulder2_right": -2.5
+      }
+    }
+  ],
+  "final_controller": {
+    "multipliers": {
+      "com": 1,
+      "balance": 1,
+      "other": 1,
+      "motor": 1
+    },
+    "tolerances": {
+      "com_cm": 1.94,
+      "balance_joints_deg_median": 25.0,
+      "other_joints_deg_median": 72.5,
+      "motor_command_median": 1.0
+    }
+  },
+  "counters": {
+    "stance_fixes": 2,
+    "controller_tries": 1,
+    "tunes": 0,
+    "evaluations": 1,
+    "simulations": 27
+  },
+  "steps": [
+    {
+      "step": 1,
+      "actor": "agent",
+      "action": "create_case",
+      "rationale": "Create the case per the request: 3kg tool on right hand, balance on left leg, starting from the tutorial keyframe since no mention of a new model.",
+      "params": {
+        "spec": {
+          "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
+          "payload_kg": 3,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [],
+          "acceptance": {
+            "disturbance": 1.0,
+            "pass_rate": 0.95
+          }
+        }
+      },
+      "metrics": {},
+      "gate": null
+    },
+    {
+      "step": 2,
+      "actor": "agent",
+      "action": "check_feasibility",
+      "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before touching the controller.",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": -0.54,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.007,
+        "root_torque_norm_Nm": 13.75,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0641,
+        "ctrl0_max_frac": 0.754,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": -2.6,
+        "static_max_ctrl": 1.163,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "actor": "agent",
+      "action": "fix_stance:trim",
+      "rationale": "Root torque residual and CoM margin fail; start with a small ankle trim to re-center foot pressure under CoM before trying posture changes.",
+      "params": {
+        "mode": "trim"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.339,
+        "root_torque_norm_Nm": 2.66,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0644,
+        "ctrl0_max_frac": 1.174,
+        "ctrl0_in_limits": false,
+        "com_margin_mm": -4.2,
+        "static_max_ctrl": 1.163,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl",
+          "com_margin_mm"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "actor": "agent",
+      "action": "fix_stance:posture",
+      "rationale": "Trim alone insufficient; posture mode can shift torso/arms to compensate for the 3kg right-hand payload, reducing ankle motor load and restoring CoM margin.",
+      "params": {
+        "mode": "posture"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.044,
+        "ctrl0_max_frac": 0.8,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 8.6,
+        "static_max_ctrl": 0.8,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 5,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Baseline LQR controller check with all multipliers at default to see how the posture-adjusted pose handles noise.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 1
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 5,
+        "n_seeds": 5,
+        "fall_times_s": [],
+        "earliest_saturation_s": null,
+        "top_saturating_actuators": {},
+        "worst_com_m": 0.0456,
+        "mean_sat": 0.0,
+        "max_gain": 47.6
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 6,
+      "actor": "agent",
+      "action": "evaluate",
+      "rationale": "Quick check passed 5/5 with no saturation at default multipliers; evaluate on the 20 unseen seeds to judge against acceptance criteria.",
+      "params": {
+        "multipliers": {
+          "com": 1,
+          "balance": 1,
+          "other": 1,
+          "motor": 1
+        }
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 20,
+        "n_seeds": 20,
+        "fall_times_s": [],
+        "earliest_saturation_s": null,
+        "top_saturating_actuators": {},
+        "worst_com_m": 0.0464,
+        "mean_sat": 0.0,
+        "max_gain": 47.6,
+        "seeds": "26-45"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 7,
+      "actor": "agent",
+      "action": "finish",
+      "rationale": "Stage 3 evaluation passed 20/20 against default acceptance criteria (disturbance=1, pass_rate=0.95); design is complete and successful.",
+      "params": {
+        "status": "passed_with_changes"
+      },
+      "metrics": {},
+      "gate": null
+    }
+  ]
+}

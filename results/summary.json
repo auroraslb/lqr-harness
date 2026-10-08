@@ -1,0 +1,120 @@
+[
+  {
+    "case": "locked_arm_5kg",
+    "actor": "agent",
+    "status": "no_solution_found",
+    "case_id": "locked_arm_5kg",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 57.9,
+    "llm_calls": 12,
+    "input_tokens": 14,
+    "output_tokens": 3653,
+    "simulations": 0,
+    "changes": [
+      "info trim (1.6 deg)",
+      "major posture (40.9 deg)"
+    ]
+  },
+  {
+    "case": "locked_arm_5kg",
+    "actor": "baseline",
+    "status": "no_solution_found",
+    "case_id": "locked_arm_5kg",
+    "simulations": 0,
+    "llm_calls": 0,
+    "seconds": 0.9,
+    "changes": [
+      "info trim (1.6 deg)",
+      "major posture (40.9 deg)"
+    ]
+  },
+  {
+    "case": "nominal",
+    "actor": "agent",
+    "status": "passed_with_changes",
+    "case_id": "nominal",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 29.5,
+    "llm_calls": 12,
+    "input_tokens": 14,
+    "output_tokens": 1935,
+    "simulations": 27,
+    "changes": [
+      "info trim (0.6 deg)"
+    ]
+  },
+  {
+    "case": "nominal",
+    "actor": "baseline",
+    "status": "passed_with_changes",
+    "case_id": "nominal",
+    "simulations": 552,
+    "llm_calls": 0,
+    "seconds": 23.0,
+    "changes": [
+      "info trim (0.6 deg)"
+    ]
+  },
+  {
+    "case": "payload_1kg_3_5x",
+    "actor": "agent",
+    "status": "passed_with_changes",
+    "case_id": "payload_1kg_3_5x",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 77.9,
+    "llm_calls": 20,
+    "input_tokens": 22,
+    "output_tokens": 3932,
+    "simulations": 150,
+    "changes": [
+      "info trim (1.1 deg)",
+      "info posture (2.0 deg)"
+    ]
+  },
+  {
+    "case": "payload_1kg_3_5x",
+    "actor": "baseline",
+    "status": "no_solution_found",
+    "case_id": "payload_1kg_3_5x",
+    "simulations": 570,
+    "llm_calls": 0,
+    "seconds": 13.6,
+    "changes": [
+      "info trim (1.1 deg)",
+      "info posture (2.0 deg)"
+    ]
+  },
+  {
+    "case": "payload_3kg",
+    "actor": "agent",
+    "status": "passed_with_changes",
+    "case_id": "payload_3kg",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 66.1,
+    "llm_calls": 14,
+    "input_tokens": 16,
+    "output_tokens": 2427,
+    "simulations": 27,
+    "changes": [
+      "info trim (1.5 deg)",
+      "warning posture (20.7 deg)"
+    ]
+  },
+  {
+    "case": "payload_3kg",
+    "actor": "baseline",
+    "status": "passed_with_changes",
+    "case_id": "payload_3kg",
+    "simulations": 570,
+    "llm_calls": 0,
+    "seconds": 24.0,
+    "changes": [
+      "info trim (1.5 deg)",
+      "warning posture (20.7 deg)"
+    ]
+  }
+]
