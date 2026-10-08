@@ -1,5 +1,7 @@
 # An agent-driven harness for the MuJoCo LQR humanoid tutorial
 
+Aurora S. Bjørlo · 8 October 2026
+
 ## 1. The tutorial
 
 I chose the LQR tutorial from [MuJoCo](https://mujoco.org), an open-source physics engine widely used in robotics, because control is a field I know well enough to see where the manual effort really goes, rather than just automating the tutorial's commands. It balances a simulated humanoid on one leg in four steps: find a pose where it can stand still, linearize its dynamics around that pose, design a linear-quadratic regulator (LQR, an optimal feedback controller), and check that it stays up for 12 seconds while random disturbances are added to its motor commands. The disturbances come from a random *seed*: the same seed always gives the same disturbances, and a new seed gives a new, unseen test.
