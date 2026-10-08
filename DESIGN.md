@@ -60,9 +60,9 @@ The baseline is a rule-based script on the same tools: fixed order, the default 
 | 1 kg, 3.5 times the disturbance | The controller: more motor effort | No solution found: its pick passed 20/20 when chosen, 17/20 when judged | Passed 20/20 on unseen seeds, with 3x motor-effort tolerance (stronger commands from the same motors), outside the baseline's grid |
 | 5 kg, right arm locked in place | Nothing allowed works: the right answer is to stop | No solution found, reporting the failed check | No solution found, naming the cause: the locked shoulder needs 107% of its strength, and no allowed fix reduced it |
 
-<p align="center"><img src="results/media/payload_1kg_3_5x_compare_seed38_end.png" width="90%" alt="Baseline (left) and agent (right) on the same disturbance seed"></p>
+<p align="center"><img src="results/media/payload_1kg_3_5x_compare_seed38.gif" width="90%" alt="Baseline (left) and agent (right) on the same disturbance seed"></p>
 
-*3.5x case, same pose and seed: the baseline falls at 10.1 s, the agent's controller stays up. Last frame of an animation; the GIF is in `results/media/`.*
+*3.5x case, same pose and seed: the baseline falls at 10.1 s, the agent's controller stays up.*
 
 The agent's run on the 3.5x case, condensed from its manifest:
 
