@@ -4,7 +4,7 @@ An agent-driven harness around the [MuJoCo LQR tutorial](https://github.com/goog
 
 **Start here:** [DESIGN.md](DESIGN.md), the design document (also sent as a PDF). The manual run and the experiments behind its numbers are in [tutorial/friction_log.md](tutorial/friction_log.md).
 
-The code is a spike that tests one assumption: an LLM working only from gate metrics can route failures to the right stage and find fixes a fixed script can't, while guardrails in code keep every result valid. It runs four cases through the agent and a rule-based baseline: the unchanged tutorial, a 3 kg payload, a 1 kg payload at 3.5 times the disturbance, and a 5 kg payload with the arm locked (results in `results/summary.md`).
+The code is a spike that tests one assumption: an LLM working only from gate metrics can route failures to the right stage and find fixes a fixed script can't, while guardrails in code keep every result valid. It runs four cases through the agent and a rule-based baseline: the unchanged tutorial, a 3 kg payload, a 1 kg payload at 3.5 times the disturbance (run three times, as `payload_1kg_3_5x`, `_run2` and `_run3`), and a 5 kg payload with the arm locked (results in `results/summary.md`).
 
 ## Layout
 
@@ -46,5 +46,5 @@ Python 3.10 or newer. For the agent, either set `ANTHROPIC_API_KEY` or sign in t
 python run_suite.py --actor baseline                        # all cases, baseline only, no LLM needed
 python run_suite.py --actor both --runtime claude-code      # agent and baseline
 python -m harness.agent_cc "Add a 3 kg tool to the right hand"   # one request
-python render.py compare payload_1kg_3_5x                   # baseline-vs-agent video
+python render.py compare payload_1kg_3_5x --agent-case payload_1kg_3_5x_run3   # baseline-vs-agent video
 ```

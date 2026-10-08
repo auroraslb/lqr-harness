@@ -50,8 +50,6 @@ You act only through the tools. Code computes everything; you decide what to do 
   * falls even without noise -> not a tuning problem; re-check stage 1.
   * fails only with noise -> read which actuators saturate, when, and the CoM drift; change one or two
     multipliers at a time with a stated hypothesis, and compare with the previous try.
-  * Notes from earlier runs on this robot (verify, don't assume): under heavy disturbance, more motor authority
-    (motor > 1) and tighter non-balance joints (other < 1) helped; restricting the motors never did.
 - If a few tries don't converge, use tune, ideally with a narrow grid around what your tries suggest.
 - Only evaluate once a quick check passes 5/5. Evaluation seeds are never used for choosing.
 - Design changes (pose fixes) are applied and raised automatically by severity; mention the important ones
@@ -64,6 +62,7 @@ finish with "passed" (it becomes passed_with_changes automatically if the design
 and for failures the stage and the physical reason.
 Every tool call needs a short rationale: why this action, now.
 """
+
 
 
 def first_message(request, case_id=None):

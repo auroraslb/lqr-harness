@@ -6,14 +6,15 @@
     "case_id": "locked_arm_5kg",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 57.9,
-    "llm_calls": 12,
+    "seconds": 64.6,
+    "llm_calls": 13,
     "input_tokens": 14,
-    "output_tokens": 3653,
+    "output_tokens": 4405,
     "simulations": 0,
     "changes": [
       "info trim (1.6 deg)",
-      "major posture (40.9 deg)"
+      "major posture (40.9 deg)",
+      "info posture (0.4 deg)"
     ]
   },
   {
@@ -36,10 +37,10 @@
     "case_id": "nominal",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 29.5,
+    "seconds": 56.4,
     "llm_calls": 12,
     "input_tokens": 14,
-    "output_tokens": 1935,
+    "output_tokens": 1906,
     "simulations": 27,
     "changes": [
       "info trim (0.6 deg)"
@@ -60,15 +61,15 @@
   {
     "case": "payload_1kg_3_5x",
     "actor": "agent",
-    "status": "passed_with_changes",
+    "status": "no_solution_found",
     "case_id": "payload_1kg_3_5x",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 77.9,
-    "llm_calls": 20,
-    "input_tokens": 22,
-    "output_tokens": 3932,
-    "simulations": 150,
+    "seconds": 149.6,
+    "llm_calls": 34,
+    "input_tokens": 36,
+    "output_tokens": 9282,
+    "simulations": 288,
     "changes": [
       "info trim (1.1 deg)",
       "info posture (2.0 deg)"
@@ -88,16 +89,50 @@
     ]
   },
   {
+    "case": "payload_1kg_3_5x_run2",
+    "actor": "agent",
+    "status": "passed_with_changes",
+    "case_id": "payload_1kg_3_5x_run2",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 117.7,
+    "llm_calls": 26,
+    "input_tokens": 28,
+    "output_tokens": 6999,
+    "simulations": 132,
+    "changes": [
+      "info trim (1.1 deg)",
+      "info posture (2.0 deg)"
+    ]
+  },
+  {
+    "case": "payload_1kg_3_5x_run3",
+    "actor": "agent",
+    "status": "passed_with_changes",
+    "case_id": "payload_1kg_3_5x_run3",
+    "model": "sonnet",
+    "runtime": "claude-code",
+    "seconds": 87.9,
+    "llm_calls": 22,
+    "input_tokens": 24,
+    "output_tokens": 4971,
+    "simulations": 126,
+    "changes": [
+      "info trim (1.1 deg)",
+      "info posture (2.0 deg)"
+    ]
+  },
+  {
     "case": "payload_3kg",
     "actor": "agent",
     "status": "passed_with_changes",
     "case_id": "payload_3kg",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 66.1,
+    "seconds": 43.9,
     "llm_calls": 14,
     "input_tokens": 16,
-    "output_tokens": 2427,
+    "output_tokens": 2498,
     "simulations": 27,
     "changes": [
       "info trim (1.5 deg)",

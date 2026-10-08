@@ -26,6 +26,15 @@ BUDGETS = {"stance_fixes": 3, "controller_tries": 8, "tunes": 2, "evaluations": 
 _RATIONALE = {"type": "string", "description": "Why you are taking this action, in one or two sentences."}
 _MULT = {"type": "number", "description": "Multiplier on the physical default tolerance: <1 tighter, >1 looser. 1 = default."}
 
+# What each multiplier does to the LQR cost. Definitions of the knobs, not advice on which way to turn them.
+_KNOBS = (
+    " Each multiplier scales one tolerance in Bryson's rule (weight = 1 / tolerance^2), so a tighter tolerance means a "
+    "larger weight. com: how far the centre of mass may drift from over the foot. balance: how far the stance-leg and "
+    "torso joints may move. other: how far the remaining joints may move. motor: how large the motor commands may be "
+    "(the R term); >1 makes control effort cheaper in the cost, so LQR chooses larger gains and uses more of each "
+    "motor's command range, <1 the opposite. No multiplier changes the motors' limits: commands beyond a limit are "
+    "clipped, which shows up as saturation.")
+
 TOOL_SCHEMAS = [
     {
         "name": "create_case",
@@ -80,7 +89,7 @@ TOOL_SCHEMAS = [
                         "multipliers, and adopt it. Then a quick check: one run without noise and 5 noise seeds. Returns "
                         "pass count, fall times, which actuators saturate and from when, CoM drift and gain size. Use it "
                         "to learn what this setup needs; start with all multipliers at 1. Requires stage 1 passed. "
-                        "Budget: 8 per case."),
+                        "Budget: 8 per case." + _KNOBS),
         "input_schema": {"type": "object", "properties": {
             "case_id": {"type": "string"},
             "com": _MULT, "balance": _MULT, "other": _MULT, "motor": _MULT,
@@ -92,7 +101,7 @@ TOOL_SCHEMAS = [
         "description": ("Stage 2: systematic search over multiplier combinations: screen each on 5 seeds, compare the "
                         "best on 20 further seeds, adopt the winner. Default grid is 0.5/1/2 for each multiplier (81 "
                         "combinations); pass your own grid to search around what your tries suggest. Returns the ranking "
-                        "and which multipliers mattered. Costs many simulations. Requires stage 1 passed. Budget: 2 per case."),
+                        "and which multipliers mattered. Costs many simulations. Requires stage 1 passed. Budget: 2 per case." + _KNOBS),
         "input_schema": {"type": "object", "properties": {
             "case_id": {"type": "string"},
             "grid": {"type": "object", "description": ("Optional. Keys com, balance, other, motor; each a list of 1-3 "

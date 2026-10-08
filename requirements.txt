@@ -1,6 +1,6 @@
-mujoco>=3.2
-numpy
-scipy
+mujoco==3.15.0   # versions used for the recorded results
+numpy==2.5.3
+scipy==1.18.1
 anthropic
 mcp<2      # only for running the agent through Claude Code
 mediapy    # render.py

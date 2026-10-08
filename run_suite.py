@@ -38,29 +38,30 @@ CASES = {
 }
 
 
-def run(actor, runtime, names, model):
+def run(actor, runtime, names, model, suffix=""):
     rows = []
     for name in names:
         case = CASES[name]
-        print(f"\n===== {actor}: {name} =====")
+        cid = name + suffix if actor == "agent" else name
+        print(f"\n===== {actor}: {cid} =====")
         t0 = time.time()
         if actor == "baseline":
             from harness.baseline import run_baseline
             stats = run_baseline(name, dict(case["spec"], request=case["request"]))
         elif runtime == "claude-code":
             from harness.agent_cc import run_agent_cc
-            stats = run_agent_cc(case["request"], case_id=name, model=model or "sonnet")
+            stats = run_agent_cc(case["request"], case_id=cid, model=model or "sonnet")
         else:
             from harness.agent import run_agent, DEFAULT_MODEL
-            stats = run_agent(case["request"], case_id=name, model=model or DEFAULT_MODEL)
+            stats = run_agent(case["request"], case_id=cid, model=model or DEFAULT_MODEL)
         stats["seconds"] = round(time.time() - t0, 1)
-        manifest = RESULTS / "cases" / actor / name / "manifest.json"
+        manifest = RESULTS / "cases" / actor / cid / "manifest.json"
         changes = []
         if manifest.exists():
             m = json.loads(manifest.read_text())
             changes = [f"{c['severity']} {c['kind']} ({c['max_change_deg']} deg)" for c in m.get("changes", [])]
             stats.setdefault("simulations", m.get("counters", {}).get("simulations"))
-        rows.append({"case": name, "actor": actor, **stats, "changes": changes})
+        rows.append({"case": cid, "actor": actor, **stats, "changes": changes})
     return rows
 
 
@@ -86,11 +87,12 @@ def main():
                    help="How the agent's LLM is called: Anthropic API, or Claude Code (subscription).")
     p.add_argument("--cases", nargs="*", default=list(CASES), choices=list(CASES))
     p.add_argument("--model", default=None)
+    p.add_argument("--suffix", default="", help="Appended to agent case ids, to keep repeated runs, e.g. _run2.")
     a = p.parse_args()
     actors = ["agent", "baseline"] if a.actor == "both" else [a.actor]
     rows = []
     for actor in actors:
-        rows += run(actor, a.runtime, a.cases, a.model)
+        rows += run(actor, a.runtime, a.cases, a.model, a.suffix)
     write_summary(rows)
 
 

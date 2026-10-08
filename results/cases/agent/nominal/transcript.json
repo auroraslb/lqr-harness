@@ -5,10 +5,10 @@
     "case_id": "nominal",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 29.0,
+    "seconds": 56.1,
     "llm_calls": 12,
     "input_tokens": 14,
-    "output_tokens": 1935,
+    "output_tokens": 1906,
     "simulations": 27
   },
   "transcript": [
@@ -22,7 +22,7 @@
         "use_keyframe": true,
         "locked_joints": [],
         "stance": "left",
-        "rationale": "Create the baseline tutorial case: one-leg stance on left leg, default keyframe, no payload, no locked joints, as requested."
+        "rationale": "Tutorial default: one-leg stance on left leg, starting from the keyframe, no payload or locked joints."
       },
       "output": {
         "case_id": "nominal",
@@ -61,7 +61,7 @@
       "name": "check_feasibility",
       "input": {
         "case_id": "nominal",
-        "rationale": "Check stage 1 static feasibility of the tutorial keyframe pose before building a controller."
+        "rationale": "Check stage 1 feasibility of the tutorial keyframe pose before building a controller."
       },
       "output": {
         "stage": 1,
@@ -88,7 +88,7 @@
     },
     {
       "role": "assistant",
-      "text": "Root torque fails (3.55 Nm > 0.5 Nm threshold) while motor need and CoM margin pass. This calls for a trim fix."
+      "text": "Root torque fails; CoM margin and motor need are fine. Trim should fix the ankle-only residual torque."
     },
     {
       "role": "tool",
@@ -96,7 +96,7 @@
       "input": {
         "case_id": "nominal",
         "mode": "trim",
-        "rationale": "Only root torque failed; a small ankle trim should bring the foot pressure under the CoM without altering the posture."
+        "rationale": "Only root torque failed; a small ankle trim should bring CoM pressure under the foot and null the residual torque."
       },
       "output": {
         "stage": 1,
@@ -131,7 +131,7 @@
     },
     {
       "role": "assistant",
-      "text": "Stage 1 now passes with a minor 0.6\u00b0 ankle trim. Moving to stage 2 controller build."
+      "text": "Stage 1 passes after a 0.6\u00b0 ankle trim. Now build the controller with default multipliers."
     },
     {
       "role": "tool",
@@ -142,7 +142,7 @@
         "balance": 1,
         "other": 1,
         "motor": 1,
-        "rationale": "Baseline LQR controller with all default multipliers to see how the tutorial pose handles noise."
+        "rationale": "Baseline LQR with default tolerances to see how the tutorial pose performs with and without noise."
       },
       "output": {
         "stage": 2,
@@ -175,14 +175,14 @@
     },
     {
       "role": "assistant",
-      "text": "Quick check passes 5/5 with no saturation at default multipliers. Proceeding to stage 3 evaluation."
+      "text": "Default multipliers already pass 5/5 with no saturation. This matches the tutorial baseline, so I'll proceed straight to evaluation."
     },
     {
       "role": "tool",
       "name": "evaluate",
       "input": {
         "case_id": "nominal",
-        "rationale": "Quick check passed 5/5 with no saturation at default multipliers; evaluate on the full 20-seed judged set."
+        "rationale": "Quick check passed 5/5 with no saturation at default multipliers; judge on the 20 held-out seeds plus the no-noise run."
       },
       "output": {
         "stage": 3,
@@ -214,7 +214,7 @@
     },
     {
       "role": "assistant",
-      "text": "Stage 3 passed 20/20 with no saturation. Finishing the case."
+      "text": "20/20 passed on unseen seeds, no saturation, no falls. Done."
     },
     {
       "role": "tool",
@@ -222,8 +222,8 @@
       "input": {
         "case_id": "nominal",
         "status": "passed",
-        "summary": "Tutorial one-leg left-stance case, no payload, no locked joints. Stage 1: tutorial keyframe failed only on root residual torque (3.55 Nm vs 0.5 Nm limit); fixed with a trim-mode ankle adjustment (ankle_x_left -0.6 deg), after which root torque = 0, CoM margin 11.4 mm, static max ctrl 0.683 (hip_x_left) \u2014 all within gates. Stage 2: default LQR multipliers (com=balance=other=motor=1) gave tolerances (CoM 1.94 cm, balance joints ~25\u00b0, other joints ~72.5\u00b0, motor command 1.0); quick check passed 5/5 with zero actuator saturation and max gain 46. Stage 3: evaluated on 20 unseeded disturbance runs plus the no-noise run \u2014 20/20 pass, no falls, no saturation, worst CoM drift 4.2 cm. No tuning beyond defaults was needed. Result: passed (with the minor automatic stance trim noted above; no other design changes made).",
-        "rationale": "Stage 3 evaluation passed 20/20 on unseen seeds with the default controller multipliers, meeting the request's acceptance criteria with only the minimal automatic ankle trim applied."
+        "summary": "Tutorial one-leg (left stance) balance, no payload, no locked joints. Stage 1 initially failed on root residual torque (3.55 Nm) with the raw keyframe; a 0.6\u00b0 trim of ankle_x_left zeroed the residual torque while keeping CoM margin (11.4 mm) and static motor need (68.3% on hip_x_left) well within gates. Built the LQR controller with default Bryson multipliers (com=balance=other=motor=1); quick check passed 5/5 with zero actuator saturation and worst CoM drift 4.2 cm. Evaluated on the 20 held-out judging seeds plus the no-noise run: 20/20 stayed up, no saturation, no falls. No design changes beyond the standard trim; controller adopted as-is.",
+        "rationale": "Stage 3 evaluation passed 20/20 on unseen seeds meeting the default acceptance criteria; case is complete."
       },
       "output": {
         "status": "passed_with_changes",
@@ -232,7 +232,7 @@
     },
     {
       "role": "assistant",
-      "text": "Done. Summary:\n\n- **Case**: `nominal` \u2014 balance on left leg per tutorial, no payload, no locked joints.\n- **Stage 1**: Tutorial keyframe failed only the root-torque gate (3.55 Nm vs 0.5 Nm limit). A `trim` fix (ankle_x_left \u22120.6\u00b0) resolved it \u2014 root torque \u2192 0, CoM margin 11.4 mm, static max ctrl 68.3% (hip_x_left), all within gates.\n- **Stage 2**: Default LQR multipliers (com=balance=other=motor=1) worked immediately \u2014 quick check passed 5/5, zero saturation, max gain 46.\n- **Stage 3**: Evaluated on 20 fresh seeds + no-noise run \u2014 20/20 passed, no falls, no saturation, worst CoM drift 4.2 cm.\n- **Result**: `passed_with_changes` (the harness auto-flags the minor ~0.6\u00b0 ankle trim as a design change, though no posture/payload/joint changes were made beyond that standard stance correction)."
+      "text": "The case **nominal** passed.\n\n**What was done:**\n- Started from the tutorial's one-leg keyframe, left stance, no payload, no locked joints.\n- Stage 1 (static feasibility) initially failed only on root residual torque (3.55 Nm); CoM margin (11.9 mm) and static motor need (66.7%) were already fine.\n- Applied a `fix_stance(mode=trim)` \u2014 a 0.6\u00b0 adjustment to `ankle_x_left` \u2014 which zeroed the residual torque (0.0 Nm) while keeping CoM margin at 11.4 mm and static motor need at 68.3% (hip_x_left), both comfortably inside gates.\n- Built the LQR controller with default multipliers (com=balance=other=motor=1). Quick check: 5/5 seeds survived, no actuator saturation, worst CoM drift 4.2 cm.\n- Evaluated on stage 3's 20 held-out seeds: 20/20 passed, no falls, no saturation, worst CoM drift 4.22 cm \u2014 well within the default acceptance (disturbance=1, pass_rate=0.95).\n\n**Result:** Passed (flagged as \"passed_with_changes\" since a minor ankle trim was needed to null the root torque \u2014 this is the standard, lowest-severity stance fix, not a design change beyond what the tutorial itself allows)."
     }
   ]
 }

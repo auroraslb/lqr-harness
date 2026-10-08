@@ -1,0 +1,457 @@
+{
+  "case_id": "payload_1kg_3_5x_run2",
+  "finished_at": "2026-10-08T11:36:59+00:00",
+  "spec": {
+    "request": "Add a 1 kg tool to the right hand. The robot must survive 3.5 times the usual disturbance.",
+    "payload_kg": 1,
+    "payload_body": "lower_arm_right",
+    "stance": "left",
+    "use_keyframe": true,
+    "locked_joints": [],
+    "acceptance": {
+      "disturbance": 3.5,
+      "pass_rate": 0.95
+    }
+  },
+  "gates": {
+    "stage1": {
+      "max_root_torque_Nm": 0.5,
+      "max_static_ctrl": 0.8,
+      "min_com_margin_mm": 5.0
+    },
+    "stage3": {
+      "max_mean_saturation": 0.01
+    }
+  },
+  "status": "passed_with_changes",
+  "summary": "Request: add a 1 kg tool to the right hand (payload on lower_arm_right), surviving 3.5x the usual disturbance.\n\nStage 1 (pose): Starting from the tutorial one-leg keyframe, the 1kg hand payload broke balance (root torque 6.59 Nm, ankle_y_left static need 83%). Fixed with fix_stance: a ~1.1deg ankle_x_left trim zeroed the root torque, then a small posture adjustment (shoulder/elbow shifts of 0.1-2.0deg) brought ankle_y_left static need to exactly 80% and CoM margin to 6.0mm - gate passes.\n\nStage 2 (controller): Default multipliers (all 1) failed badly under the 3.5x disturbance (0/5 quick-check, mean saturation 38%, dominated by ankle_x_left/ankle_y_left/hip_x_left). Making control effort more expensive (motor=0.5) made it worse (0/5, 58% sat). Making effort cheaper via the motor multiplier (larger gains, more control authority) steadily helped: motor=2 -> 1/5; motor=3 -> 5/5 quick-check with a hint of late saturation (0.7%, 8.8s); motor=4 -> 5/5 with zero saturation. A tune over motor in {3,4,5} (com/balance/other fixed at 1) confirmed motor=4 and motor=5 both reach 20/20 on the larger comparison set with zero mean saturation; motor=3 only reached 15/20. Adopted motor=4 (smaller gain than 5, same robustness: max_gain 139 vs 167).\n\nStage 3 (judged): Evaluated on 20 fresh unseen seeds plus the no-noise run at the required 3.5x disturbance: 20/20 pass, no falls, mean saturation 0.03% (only ankle_y_left briefly, starting at 2.12s), worst CoM drift 5.1cm. Gate passed with no failures.\n\nFinal design: right-hand payload 1kg, trimmed/posture-adjusted one-leg stance, LQR with com=1, balance=1, other=1, motor=4. Meets the 3.5x disturbance acceptance criterion with full margin.</parameter>\n</invoke>\n",
+  "changes": [
+    {
+      "kind": "trim",
+      "severity": "info",
+      "max_change_deg": 1.1,
+      "detail": "fix_stance(mode=trim)",
+      "joint_changes_deg": {
+        "ankle_x_left": -1.1
+      }
+    },
+    {
+      "kind": "posture",
+      "severity": "info",
+      "max_change_deg": 2.0,
+      "detail": "fix_stance(mode=posture)",
+      "joint_changes_deg": {
+        "elbow_left": 0.4,
+        "shoulder1_left": 0.1,
+        "shoulder1_right": 0.6,
+        "shoulder2_left": -0.7,
+        "shoulder2_right": -2.0
+      }
+    }
+  ],
+  "final_controller": {
+    "multipliers": {
+      "com": 1,
+      "balance": 1,
+      "other": 1,
+      "motor": 4
+    },
+    "tolerances": {
+      "com_cm": 1.94,
+      "balance_joints_deg_median": 25.0,
+      "other_joints_deg_median": 72.5,
+      "motor_command_median": 4.0
+    }
+  },
+  "counters": {
+    "stance_fixes": 2,
+    "controller_tries": 5,
+    "tunes": 1,
+    "evaluations": 1,
+    "simulations": 132
+  },
+  "steps": [
+    {
+      "step": 1,
+      "actor": "agent",
+      "action": "create_case",
+      "rationale": "Start the case using the tutorial one-leg keyframe, with 1kg payload on the right forearm/hand and acceptance requiring surviving 3.5x the default disturbance.",
+      "params": {
+        "spec": {
+          "request": "Add a 1 kg tool to the right hand. The robot must survive 3.5 times the usual disturbance.",
+          "payload_kg": 1,
+          "payload_body": "lower_arm_right",
+          "stance": "left",
+          "use_keyframe": true,
+          "locked_joints": [],
+          "acceptance": {
+            "disturbance": 3.5,
+            "pass_rate": 0.95
+          }
+        }
+      },
+      "metrics": {},
+      "gate": null
+    },
+    {
+      "step": 2,
+      "actor": "agent",
+      "action": "check_feasibility",
+      "rationale": "Check if the one-leg keyframe pose is still statically feasible with the added 1kg hand payload before any controller work.",
+      "params": {},
+      "metrics": {
+        "height_offset_mm": -0.518,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.127,
+        "root_torque_norm_Nm": 6.59,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0482,
+        "ctrl0_max_frac": 0.686,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 6.8,
+        "static_max_ctrl": 0.831,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "root_torque_norm_Nm",
+          "static_max_ctrl"
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "actor": "agent",
+      "action": "fix_stance:trim",
+      "rationale": "Root torque and static motor need (ankle_y_left at 83%) fail; trim the stance ankle to re-center pressure under the shifted CoM from the hand payload.",
+      "params": {
+        "mode": "trim"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": -0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0484,
+        "ctrl0_max_frac": 0.83,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 5.8,
+        "static_max_ctrl": 0.83,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": false,
+        "failed": [
+          "static_max_ctrl"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "actor": "agent",
+      "action": "fix_stance:posture",
+      "rationale": "Static motor need at ankle_y_left is still 83% (>80%) after trim; adjust torso/arm posture to redistribute load and bring motor need under the limit while keeping CoM margin >=6mm.",
+      "params": {
+        "mode": "posture"
+      },
+      "metrics": {
+        "height_offset_mm": 0.0,
+        "offset_at_sweep_edge": false,
+        "vertical_residual_N": 0.0,
+        "root_torque_norm_Nm": 0.0,
+        "root_force_horiz_N": 0.0,
+        "init_com_foot_m": 0.0469,
+        "ctrl0_max_frac": 0.8,
+        "ctrl0_in_limits": true,
+        "com_margin_mm": 6.0,
+        "static_max_ctrl": 0.8,
+        "static_limiting_actuator": "ankle_y_left"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 5,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Baseline LQR check with default multipliers to see how the controller handles the payload and the elevated 3.5x disturbance requirement before tuning.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 1
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 0,
+        "n_seeds": 5,
+        "fall_times_s": [
+          2.65,
+          1.47,
+          2.55,
+          1.95,
+          4.565
+        ],
+        "earliest_saturation_s": 0.215,
+        "top_saturating_actuators": {
+          "ankle_x_left": 776,
+          "ankle_y_left": 256,
+          "hip_x_left": 174
+        },
+        "worst_com_m": 0.1496,
+        "mean_sat": 0.3756,
+        "max_gain": 46.5
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 6,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Baseline shows heavy saturation (mean 37.6%) on ankle_x_left/ankle_y_left/hip_x_left across all 5 noisy seeds, causing falls. Tightening the motor tolerance (0.5x, making effort more costly) should yield smaller gains and less saturation, testing if that improves survival under the 3.5x disturbance.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 0.5
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 0,
+        "n_seeds": 5,
+        "fall_times_s": [
+          1.625,
+          1.235,
+          1.71,
+          1.73,
+          1.505
+        ],
+        "earliest_saturation_s": 0.105,
+        "top_saturating_actuators": {
+          "ankle_x_left": 748,
+          "ankle_y_left": 282,
+          "hip_x_left": 196
+        },
+        "worst_com_m": 0.1495,
+        "mean_sat": 0.5825,
+        "max_gain": 31.4
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 7,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Motor=0.5 made things worse (faster falls, higher saturation), so the gains were too weak to counter the 3.5x disturbance. Try the opposite direction, motor=2 (cheaper effort, larger gains), to see if more aggressive early correction reduces CoM drift before saturation.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 2
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 1,
+        "n_seeds": 5,
+        "fall_times_s": [
+          4.785,
+          2.675,
+          6.96,
+          2.94
+        ],
+        "earliest_saturation_s": 1.73,
+        "top_saturating_actuators": {
+          "ankle_x_left": 939,
+          "ankle_y_left": 209,
+          "hip_x_left": 67
+        },
+        "worst_com_m": 0.1498,
+        "mean_sat": 0.2161,
+        "max_gain": 78.3
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 8,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Motor=2 improved results (1/5 pass, saturation dropped to 22%, longer fall times). Push further to motor=4 to see if even larger gains further reduce saturation/CoM drift under the 3.5x disturbance.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 4
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 5,
+        "n_seeds": 5,
+        "fall_times_s": [],
+        "earliest_saturation_s": null,
+        "top_saturating_actuators": {},
+        "worst_com_m": 0.0489,
+        "mean_sat": 0.0,
+        "max_gain": 139.0
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 9,
+      "actor": "agent",
+      "action": "try_controller",
+      "rationale": "Motor=4 achieved 5/5 with zero saturation; check motor=3 to see where the pass threshold lies and whether a less aggressive gain still fully succeeds, giving margin information before committing.",
+      "params": {
+        "com": 1,
+        "balance": 1,
+        "other": 1,
+        "motor": 3
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 5,
+        "n_seeds": 5,
+        "fall_times_s": [],
+        "earliest_saturation_s": 8.83,
+        "top_saturating_actuators": {
+          "hip_x_left": 51,
+          "ankle_y_left": 34
+        },
+        "worst_com_m": 0.0501,
+        "mean_sat": 0.0071,
+        "max_gain": 109.3
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 10,
+      "actor": "agent",
+      "action": "tune",
+      "rationale": "Both motor=3 and motor=4 passed 5/5 quick checks (motor=4 with zero saturation). Run a narrow tune across motor=3/4/5 (others fixed at 1) screened on 5 seeds and compared on 20 more, to pick the most robust setting before spending an evaluation.",
+      "params": {
+        "grid": {
+          "com": [
+            1
+          ],
+          "balance": [
+            1
+          ],
+          "other": [
+            1
+          ],
+          "motor": [
+            3,
+            4,
+            5
+          ]
+        }
+      },
+      "metrics": {
+        "adopted": {
+          "com": 1,
+          "balance": 1,
+          "other": 1,
+          "motor": 4
+        },
+        "ranking": [
+          {
+            "multipliers": {
+              "com": 1,
+              "balance": 1,
+              "other": 1,
+              "motor": 4
+            },
+            "screen": "5/5",
+            "choose_pass": "20/20",
+            "mean_sat": 0.0,
+            "max_gain": 139.0
+          },
+          {
+            "multipliers": {
+              "com": 1,
+              "balance": 1,
+              "other": 1,
+              "motor": 5
+            },
+            "screen": "5/5",
+            "choose_pass": "20/20",
+            "mean_sat": 0.0,
+            "max_gain": 167.3
+          }
+        ],
+        "simulations": 81
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 11,
+      "actor": "agent",
+      "action": "evaluate",
+      "rationale": "Adopted controller (com=1, balance=1, other=1, motor=4) passed 20/20 on the tune's comparison set with zero saturation; run the formal stage 3 judgment on fresh unseen seeds under the 3.5x disturbance requirement.",
+      "params": {
+        "multipliers": {
+          "com": 1,
+          "balance": 1,
+          "other": 1,
+          "motor": 4
+        }
+      },
+      "metrics": {
+        "no_noise_fell": false,
+        "no_noise_fell_time": null,
+        "pass": 20,
+        "n_seeds": 20,
+        "fall_times_s": [],
+        "earliest_saturation_s": 2.12,
+        "top_saturating_actuators": {
+          "ankle_y_left": 14
+        },
+        "worst_com_m": 0.0512,
+        "mean_sat": 0.0003,
+        "max_gain": 139.0,
+        "seeds": "26-45"
+      },
+      "gate": {
+        "pass": true,
+        "failed": []
+      }
+    },
+    {
+      "step": 12,
+      "actor": "agent",
+      "action": "finish",
+      "rationale": "Stage 3 judged the controller on 20 unseen seeds at the required 3.5x disturbance and it passed cleanly (20/20, no falls, negligible saturation), satisfying the acceptance criterion.",
+      "params": {
+        "status": "passed_with_changes"
+      },
+      "metrics": {},
+      "gate": null
+    }
+  ]
+}

@@ -102,7 +102,7 @@ def pipeline():
     ya, ha = 105, 150
     s.box(75, ya, 135, ha, ["**Plan**", "request → spec:", "payload, locked", "joints, required", "pass rate"], "agent", size=13)
     s.box(235, ya, 225, ha, ["**Choose a pose fix**", "trim, posture or search,", "picked from the check", "that failed"], "agent", size=12.5)
-    s.box(550, ya, 320, ha, ["**Tune the controller**", "sets 4 multipliers or a search range", "saturates under noise → more effort", "falls without noise → back to the pose", "5/5 on the quick check → evaluate"], "agent", size=12.5)
+    s.box(550, ya, 320, ha, ["**Tune the controller**", "sets 4 multipliers or a search range,", "one hypothesis at a time", "falls without noise → back to the pose", "5/5 on the quick check → evaluate"], "agent", size=12.5)
     s.box(1075, ya, 140, ha, ["**Finish**", "status and", "the reason"], "agent", size=13)
 
     # harness: stages and the two gates

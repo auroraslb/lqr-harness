@@ -5,10 +5,10 @@
     "case_id": "payload_3kg",
     "model": "sonnet",
     "runtime": "claude-code",
-    "seconds": 65.8,
+    "seconds": 43.9,
     "llm_calls": 14,
     "input_tokens": 16,
-    "output_tokens": 2427,
+    "output_tokens": 2498,
     "simulations": 27
   },
   "transcript": [
@@ -22,7 +22,7 @@
         "use_keyframe": true,
         "locked_joints": [],
         "stance": "left",
-        "rationale": "Create the case per the request: 3kg tool on right hand, balance on left leg, starting from the tutorial keyframe since no mention of a new model."
+        "rationale": "Start case with 3kg payload on right hand (default lower_arm_right), balancing on left leg from tutorial keyframe."
       },
       "output": {
         "case_id": "payload_3kg",
@@ -61,7 +61,7 @@
       "name": "check_feasibility",
       "input": {
         "case_id": "payload_3kg",
-        "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before touching the controller."
+        "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before any controller work."
       },
       "output": {
         "stage": 1,
@@ -94,7 +94,7 @@
       "input": {
         "case_id": "payload_3kg",
         "mode": "trim",
-        "rationale": "Root torque residual and CoM margin fail; start with a small ankle trim to re-center foot pressure under CoM before trying posture changes."
+        "rationale": "Root torque and CoM margin fail; start with the small ankle trim to re-center foot pressure before heavier posture changes."
       },
       "output": {
         "stage": 1,
@@ -132,16 +132,12 @@
       }
     },
     {
-      "role": "assistant",
-      "text": "Trim improved root torque but not enough, and motor need/CoM margin still fail. Moving to posture fix (adjusts torso/arms too, which should help offload the ankle and recenter CoM with the heavy right-hand payload)."
-    },
-    {
       "role": "tool",
       "name": "fix_stance",
       "input": {
         "case_id": "payload_3kg",
         "mode": "posture",
-        "rationale": "Trim alone insufficient; posture mode can shift torso/arms to compensate for the 3kg right-hand payload, reducing ankle motor load and restoring CoM margin."
+        "rationale": "Trim alone insufficient; the 3kg hand payload needs torso/arm repositioning to bring CoM back over the foot and reduce ankle motor load."
       },
       "output": {
         "stage": 1,
@@ -185,7 +181,7 @@
     },
     {
       "role": "assistant",
-      "text": "Stage 1 now passes (root torque 0, CoM margin 8.6mm, static ctrl at exactly 80%). Proceeding to controller design."
+      "text": "Stage 1 now passes. Moving to controller design."
     },
     {
       "role": "tool",
@@ -196,7 +192,7 @@
         "balance": 1,
         "other": 1,
         "motor": 1,
-        "rationale": "Baseline LQR controller check with all multipliers at default to see how the posture-adjusted pose handles noise."
+        "rationale": "Baseline LQR controller with default multipliers to see how the payload-adjusted stance behaves under noise."
       },
       "output": {
         "stage": 2,
@@ -229,14 +225,14 @@
     },
     {
       "role": "assistant",
-      "text": "Baseline passed 5/5 with zero saturation. This looks solid already. Let's evaluate on the stage 3 judge."
+      "text": "Baseline passes 5/5 with no saturation. Proceeding to full evaluation."
     },
     {
       "role": "tool",
       "name": "evaluate",
       "input": {
         "case_id": "payload_3kg",
-        "rationale": "Quick check passed 5/5 with no saturation at default multipliers; evaluate on the 20 unseen seeds to judge against acceptance criteria."
+        "rationale": "Quick check passed 5/5 with no saturation and low gains; evaluate on the 20 unseen judged seeds to confirm stage 3."
       },
       "output": {
         "stage": 3,
@@ -268,7 +264,7 @@
     },
     {
       "role": "assistant",
-      "text": "20/20 passed with no falls, no saturation, comfortable CoM margins. Finishing as passed."
+      "text": "20/20 seeds passed, no falls, no saturation. Design succeeds."
     },
     {
       "role": "tool",
@@ -276,8 +272,8 @@
       "input": {
         "case_id": "payload_3kg",
         "status": "passed",
-        "summary": "Added 3 kg payload to lower_arm_right (right hand/tool). Stage 1 initially failed on all three gates (root torque 13.75 Nm, static ctrl 116% on ankle_y_left, CoM margin -2.6 mm) due to the added mass pulling the CoM outside the left foot. A 1.5 deg ankle trim improved root torque but motor need/CoM margin still failed; a posture fix then redistributed torso and arms (notably shoulder_right +20.7 deg, elbow_right +4.6 deg, torso abdomen_y -0.9 deg, plus smaller left-arm/ankle adjustments) to counterbalance the right-hand payload. This brought the pose to root torque 0, static ctrl exactly at the 80% limit on ankle_y_left, and CoM margin +8.6 mm \u2014 all gates pass. Built the default LQR controller (com=balance=other=motor=1); quick check passed 5/5 with zero actuator saturation and worst CoM drift 4.6 cm. Evaluated on 20 unseen seeds (stage 3): 20/20 passed, no falls (including the no-noise run), zero mean saturation, same CoM drift magnitude. No tuning was needed beyond the pose fix. Design is accepted as passed_with_changes due to the posture modification required to carry the payload.",
-        "rationale": "Stage 3 evaluation passed 20/20 against default acceptance criteria (disturbance=1, pass_rate=0.95); design is complete and successful."
+        "summary": "Added a 3 kg payload to lower_arm_right (right hand) with the robot balancing on the left leg from the tutorial keyframe.\n\nStage 1: Initial pose failed all three gates (root torque 13.75 Nm, CoM margin -2.6 mm outside foot, ankle_y_left static load 116% of range) due to the asymmetric 3kg load pulling CoM off the support foot. A 1.5\u00b0 ankle trim reduced root torque to 2.66 Nm but CoM margin and motor need still failed. A posture fix then redistributed load: torso tilted (abdomen_y -0.9\u00b0, abdomen_x -0.3\u00b0), right arm raised/retracted (shoulder1_right +20.7\u00b0, shoulder2_right -2.5\u00b0, elbow_right +4.6\u00b0) and left arm counter-balanced (shoulder1_left -4.2\u00b0, shoulder2_left -5.8\u00b0, elbow_left +1.3\u00b0), plus a small ankle adjustment. Result: root torque 0 Nm, CoM margin +8.6 mm, static ctrl exactly at the 80% limit on ankle_y_left \u2014 all gates passed.\n\nStage 2: Default LQR multipliers (com=balance=other=motor=1) gave tolerances (CoM 1.94 cm, balance joints 25\u00b0, other joints 72.5\u00b0) that already handled the payload well: quick check passed 5/5 seeds, no falls, zero actuator saturation, worst CoM drift 4.56 cm, max gain 47.6.\n\nStage 3: Evaluated on 20 fresh unseen seeds (26-45) plus the no-noise run: 20/20 passed, no falls, zero saturation, worst CoM drift 4.64 cm. Meets the default acceptance (disturbance=1, pass_rate=0.95).\n\nNo further tuning was needed; default multipliers were sufficient once the stance posture was corrected for the added hand mass.",
+        "rationale": "Stage 3 evaluation passed 20/20 on unseen seeds with no saturation, meeting the default acceptance criteria; the case is complete."
       },
       "output": {
         "status": "passed_with_changes",
@@ -286,7 +282,7 @@
     },
     {
       "role": "assistant",
-      "text": "The design passed, as **passed_with_changes**. Summary:\n\n**Task:** Add a 3 kg tool to the right hand, balance on the left leg.\n\n**Stage 1 (stance):** The naive keyframe pose failed all three gates once the 3 kg was added to the right forearm \u2014 the CoM shifted outside the foot (-2.6 mm margin) and the ankle motor was overloaded (116% of range). A small ankle trim alone wasn't enough, so a posture fix redistributed the torso and arms to counterbalance the hand-held load \u2014 most notably rotating the right shoulder ~21\u00b0 and right elbow ~4.6\u00b0, with compensating left-arm and torso adjustments. Result: root torque residual 0, ankle motor exactly at the 80% cap, CoM margin +8.6 mm. All gates pass.\n\n**Stage 2 (controller):** The default LQR controller (all four multipliers = 1) already handled the posture-corrected stance well \u2014 5/5 noise seeds held, zero actuator saturation, max CoM drift 4.6 cm. No tuning was required.\n\n**Stage 3 (judge):** Evaluated on 20 fresh seeds plus the no-noise run: 20/20 stayed balanced, zero saturation, consistent CoM drift (~4.6 cm worst case).\n\nThe only real cost of the payload was the posture change (arm/torso repositioning to counterbalance the tool) \u2014 the control gains needed no loosening or extra motor authority."
+      "text": "The case **payload_3kg** passed (recorded as `passed_with_changes` since the stance pose was adjusted).\n\n**Summary:**\n- **Request:** Add a 3 kg tool to the right hand, balance on the left leg.\n- **Stage 1 (stance):** The naive one-leg keyframe failed outright with the added mass (root torque 13.75 Nm, CoM 2.6 mm outside the foot, ankle motor overloaded at 116%). A small ankle trim helped the torque but not the rest, so a posture fix was applied: torso leaned slightly, right arm drawn in/up (shoulder1_right +20.7\u00b0, the largest single change), left arm swung out as a counterweight. This fully balanced the robot \u2014 0 Nm residual torque, CoM 8.6 mm inside the foot, ankle motor exactly at the 80% cap.\n- **Stage 2 (controller):** Default multipliers (all = 1) were already sufficient \u2014 quick check passed 5/5 seeds with zero saturation and modest gains (max 47.6).\n- **Stage 3 (judge):** 20/20 unseen seeds passed, no falls, no saturation, worst CoM drift 4.64 cm \u2014 meeting the default acceptance bar (disturbance \u00d71, 95% pass rate).\n\nNo tuning iterations or budget stress were needed beyond the stance fix; the controller worked out of the box once the pose was rebalanced for the added hand mass."
     }
   ]
 }

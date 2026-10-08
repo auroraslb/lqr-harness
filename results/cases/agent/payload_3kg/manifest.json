@@ -1,6 +1,6 @@
 {
   "case_id": "payload_3kg",
-  "finished_at": "2026-10-07T21:08:05+00:00",
+  "finished_at": "2026-10-08T11:31:27+00:00",
   "spec": {
     "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
     "payload_kg": 3,
@@ -24,7 +24,7 @@
     }
   },
   "status": "passed_with_changes",
-  "summary": "Added 3 kg payload to lower_arm_right (right hand/tool). Stage 1 initially failed on all three gates (root torque 13.75 Nm, static ctrl 116% on ankle_y_left, CoM margin -2.6 mm) due to the added mass pulling the CoM outside the left foot. A 1.5 deg ankle trim improved root torque but motor need/CoM margin still failed; a posture fix then redistributed torso and arms (notably shoulder_right +20.7 deg, elbow_right +4.6 deg, torso abdomen_y -0.9 deg, plus smaller left-arm/ankle adjustments) to counterbalance the right-hand payload. This brought the pose to root torque 0, static ctrl exactly at the 80% limit on ankle_y_left, and CoM margin +8.6 mm \u2014 all gates pass. Built the default LQR controller (com=balance=other=motor=1); quick check passed 5/5 with zero actuator saturation and worst CoM drift 4.6 cm. Evaluated on 20 unseen seeds (stage 3): 20/20 passed, no falls (including the no-noise run), zero mean saturation, same CoM drift magnitude. No tuning was needed beyond the pose fix. Design is accepted as passed_with_changes due to the posture modification required to carry the payload.",
+  "summary": "Added a 3 kg payload to lower_arm_right (right hand) with the robot balancing on the left leg from the tutorial keyframe.\n\nStage 1: Initial pose failed all three gates (root torque 13.75 Nm, CoM margin -2.6 mm outside foot, ankle_y_left static load 116% of range) due to the asymmetric 3kg load pulling CoM off the support foot. A 1.5\u00b0 ankle trim reduced root torque to 2.66 Nm but CoM margin and motor need still failed. A posture fix then redistributed load: torso tilted (abdomen_y -0.9\u00b0, abdomen_x -0.3\u00b0), right arm raised/retracted (shoulder1_right +20.7\u00b0, shoulder2_right -2.5\u00b0, elbow_right +4.6\u00b0) and left arm counter-balanced (shoulder1_left -4.2\u00b0, shoulder2_left -5.8\u00b0, elbow_left +1.3\u00b0), plus a small ankle adjustment. Result: root torque 0 Nm, CoM margin +8.6 mm, static ctrl exactly at the 80% limit on ankle_y_left \u2014 all gates passed.\n\nStage 2: Default LQR multipliers (com=balance=other=motor=1) gave tolerances (CoM 1.94 cm, balance joints 25\u00b0, other joints 72.5\u00b0) that already handled the payload well: quick check passed 5/5 seeds, no falls, zero actuator saturation, worst CoM drift 4.56 cm, max gain 47.6.\n\nStage 3: Evaluated on 20 fresh unseen seeds (26-45) plus the no-noise run: 20/20 passed, no falls, zero saturation, worst CoM drift 4.64 cm. Meets the default acceptance (disturbance=1, pass_rate=0.95).\n\nNo further tuning was needed; default multipliers were sufficient once the stance posture was corrected for the added hand mass.",
   "changes": [
     {
       "kind": "trim",
@@ -80,7 +80,7 @@
       "step": 1,
       "actor": "agent",
       "action": "create_case",
-      "rationale": "Create the case per the request: 3kg tool on right hand, balance on left leg, starting from the tutorial keyframe since no mention of a new model.",
+      "rationale": "Start case with 3kg payload on right hand (default lower_arm_right), balancing on left leg from tutorial keyframe.",
       "params": {
         "spec": {
           "request": "Add a 3 kg tool to the right hand and keep the robot balancing on its left leg.",
@@ -102,7 +102,7 @@
       "step": 2,
       "actor": "agent",
       "action": "check_feasibility",
-      "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before touching the controller.",
+      "rationale": "Check stage 1 feasibility of the one-leg stance with the 3kg payload before any controller work.",
       "params": {},
       "metrics": {
         "height_offset_mm": -0.54,
@@ -130,7 +130,7 @@
       "step": 3,
       "actor": "agent",
       "action": "fix_stance:trim",
-      "rationale": "Root torque residual and CoM margin fail; start with a small ankle trim to re-center foot pressure under CoM before trying posture changes.",
+      "rationale": "Root torque and CoM margin fail; start with the small ankle trim to re-center foot pressure before heavier posture changes.",
       "params": {
         "mode": "trim"
       },
@@ -160,7 +160,7 @@
       "step": 4,
       "actor": "agent",
       "action": "fix_stance:posture",
-      "rationale": "Trim alone insufficient; posture mode can shift torso/arms to compensate for the 3kg right-hand payload, reducing ankle motor load and restoring CoM margin.",
+      "rationale": "Trim alone insufficient; the 3kg hand payload needs torso/arm repositioning to bring CoM back over the foot and reduce ankle motor load.",
       "params": {
         "mode": "posture"
       },
@@ -186,7 +186,7 @@
       "step": 5,
       "actor": "agent",
       "action": "try_controller",
-      "rationale": "Baseline LQR controller check with all multipliers at default to see how the posture-adjusted pose handles noise.",
+      "rationale": "Baseline LQR controller with default multipliers to see how the payload-adjusted stance behaves under noise.",
       "params": {
         "com": 1,
         "balance": 1,
@@ -214,7 +214,7 @@
       "step": 6,
       "actor": "agent",
       "action": "evaluate",
-      "rationale": "Quick check passed 5/5 with no saturation at default multipliers; evaluate on the 20 unseen seeds to judge against acceptance criteria.",
+      "rationale": "Quick check passed 5/5 with no saturation and low gains; evaluate on the 20 unseen judged seeds to confirm stage 3.",
       "params": {
         "multipliers": {
           "com": 1,
@@ -245,7 +245,7 @@
       "step": 7,
       "actor": "agent",
       "action": "finish",
-      "rationale": "Stage 3 evaluation passed 20/20 against default acceptance criteria (disturbance=1, pass_rate=0.95); design is complete and successful.",
+      "rationale": "Stage 3 evaluation passed 20/20 on unseen seeds with no saturation, meeting the default acceptance criteria; the case is complete.",
       "params": {
         "status": "passed_with_changes"
       },

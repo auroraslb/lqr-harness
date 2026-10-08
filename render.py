@@ -1,6 +1,7 @@
 """Render saved cases as videos and images, for the README and the debrief.
 
     python render.py compare payload_1kg_3_5x      # baseline vs agent, side by side, same seed
+    python render.py compare payload_1kg_3_5x --agent-case payload_1kg_3_5x_run3   # a specific agent run
     python render.py pose payload_3kg              # tutorial pose vs fixed pose (still image)
     python render.py run payload_3kg --actor agent # one controller, one seed
 
@@ -123,8 +124,8 @@ def cmd_run(case, actor, seed):
     save(frames, f"{case}_{actor}_seed{seed}")
 
 
-def cmd_compare(case, seed):
-    a, b = load(case, "baseline"), load(case, "agent")
+def cmd_compare(case, seed, agent_case=None):
+    a, b = load(case, "baseline"), load(agent_case or case, "agent")
     if seed is None:   # first judge seed where the baseline falls and the agent stays up
         seeds = range(JUDGE_START, JUDGE_START + JUDGE_BLOCK)
         seed = next((s for s in seeds
@@ -177,12 +178,13 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("compare"); s.add_argument("case"); s.add_argument("--seed", type=int)
+    s.add_argument("--agent-case", default=None, help="agent run to show, if not the same id as the case")
     s = sub.add_parser("pose"); s.add_argument("case"); s.add_argument("--actor", default="agent")
     s = sub.add_parser("run"); s.add_argument("case"); s.add_argument("--actor", default="agent")
     s.add_argument("--seed", type=int, default=JUDGE_START)
     a = p.parse_args()
     if a.cmd == "compare":
-        cmd_compare(a.case, a.seed)
+        cmd_compare(a.case, a.seed, a.agent_case)
     elif a.cmd == "pose":
         cmd_pose(a.case, a.actor)
     else:
